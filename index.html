@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>맞춤법 띄어쓰기 검사기</title>
+<style>
+body {
+    font-family: "Malgun Gothic", sans-serif;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f4f6f8;
+}
+h1 {
+    text-align: center;
+}
+textarea {
+    width: 100%;
+    height: 220px;
+    padding: 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: vertical;
+}
+button {
+    margin-top: 15px;
+    padding: 12px 24px;
+    font-size: 16px;
+    background: #2d7ef7;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+button:hover {
+    background: #145fd1;
+}
+.result {
+    margin-top: 30px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+.error {
+    color: red;
+    margin-bottom: 10px;
+}
+.success {
+    color: green;
+}
+</style>
+</head>
+<body>
+
+<h1>띄어쓰기 검사기</h1>
+
+<textarea id="inputText" placeholder="검사할 글을 입력하세요."></textarea>
+<button onclick="checkSpacing()">검사하기</button>
+
+<div class="result" id="resultArea">
+    결과가 여기에 표시됩니다.
+</div>
+
+<script>
+// 사전 설정 (정답 기준)
+const dictionary = [
+    { correct: "할 수 있다", wrong: "할수있다" },
+    { correct: "될 수 있다", wrong: "될수있다" },
+    { correct: "한 번", wrong: "한번" },
+    { correct: "몇 개", wrong: "몇개" },
+    { correct: "이상 없다", wrong: "이상없다" },
+    { correct: "잘못되다", wrong: "잘못 되다" },
+    { correct: "되어 있다", wrong: "되어있다" },
+    { correct: "할 것이다", wrong: "할것이다" },
+    { correct: "안 된다", wrong: "안된다" },
+    { correct: "못 한다", wrong: "못한다" }
+];
+
+function checkSpacing() {
+    const text = document.getElementById("inputText").value;
+    const resultArea = document.getElementById("resultArea");
+
+    let foundErrors = [];
+
+    dictionary.forEach(item => {
+        if (text.includes(item.wrong)) {
+            foundErrors.push(
+                `"${item.wrong}" → "${item.correct}" 로 수정하세요.`
+            );
+        }
+    });
+
+    if (foundErrors.length === 0) {
+        resultArea.innerHTML = `<p class="success">띄어쓰기 오류를 찾지 못했습니다.</p>`;
+    } else {
+        let html = `<h3>찾아낸 오류 목록</h3>`;
+        foundErrors.forEach(err => {
+            html += `<div class="error">• ${err}</div>`;
+        });
+        resultArea.innerHTML = html;
+    }
+}
+</script>
+
+</body>
+</html>
