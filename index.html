@@ -43,7 +43,7 @@ code {
 </head>
 <body>
 
-<h2>띄어쓰기 검사기 v0.2</h2>
+<h2>띄어쓰기 검사기 v0.3</h2>
 
 <textarea id="inputText" placeholder="검사할 글을 입력하세요"></textarea>
 <br>
@@ -68,12 +68,11 @@ const dictionary = [
     { correct: "6.15남북공동선언", wrong: "6.15 남북공동선언" },
     { correct: "6월항쟁", wrong: "6월 항쟁" },
     { correct: "9월평양선언", wrong: "9월 평양선언" },
-    { correct: "대북 정책", wrong: "대북정책" }
+    { correct: "대북 정책", wrong: "대북정책" },
 
     // 와일드카드 예시
     { correct: "민주*당", wrong: "민주 *당" },
-    { correct: "한*연합", wrong: "한 * 연합" },
-    { correct: "조선민주주의인민공화국", wrong: "조선 민주주의 인민 공화국" }
+    { correct: "한*연합", wrong: "한 * 연합" }
 ];
 
 // ==============================
@@ -118,7 +117,7 @@ function checkSpacing() {
         }
     });
 
-    if (errors.length === 0) {
+    if (errors.length == 0) {
         resultDiv.innerHTML = `<p class="good">오류가 발견되지 않았습니다.</p>`;
     } else {
         resultDiv.innerHTML =
