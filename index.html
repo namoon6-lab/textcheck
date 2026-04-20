@@ -3,103 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>맞춤법 띄어쓰기 검사기</title>
+<title>띄어쓰기 검사기 (와일드카드 지원)</title>
 <style>
 body {
-    font-family: "Malgun Gothic", sans-serif;
+    font-family: sans-serif;
     max-width: 900px;
-    margin: 40px auto;
+    margin: 30px auto;
     padding: 20px;
-    background: #f4f6f8;
-}
-h1 {
-    text-align: center;
 }
 textarea {
     width: 100%;
     height: 220px;
-    padding: 15px;
     font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    resize: vertical;
+    padding: 10px;
 }
 button {
     margin-top: 15px;
-    padding: 12px 24px;
+    padding: 10px 20px;
     font-size: 16px;
-    background: #2d7ef7;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-button:hover {
-    background: #145fd1;
 }
 .result {
-    margin-top: 30px;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
+    margin-top: 25px;
+    padding: 15px;
+    background: #f3f3f3;
+    border-radius: 8px;
 }
 .error {
     color: red;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
-.success {
+.good {
     color: green;
+}
+code {
+    background: #fff;
+    padding: 2px 5px;
 }
 </style>
 </head>
 <body>
 
-<h1>띄어쓰기 검사기</h1>
+<h2>띄어쓰기 검사기</h2>
 
-<textarea id="inputText" placeholder="검사할 글을 입력하세요."></textarea>
+<textarea id="inputText" placeholder="검사할 글을 입력하세요"></textarea>
+<br>
 <button onclick="checkSpacing()">검사하기</button>
 
-<div class="result" id="resultArea">
-    결과가 여기에 표시됩니다.
-</div>
+<div class="result" id="result"></div>
 
 <script>
-// 사전 설정 (정답 기준)
+// ==============================
+// 사전 등록
+// correct = 올바른 형태
+// wrong   = 잘못 쓴 형태
+// * 사용 가능
+// ==============================
 const dictionary = [
-    { correct: "할 수 있다", wrong: "할수있다" },
-    { correct: "될 수 있다", wrong: "될수있다" },
-    { correct: "한 번", wrong: "한번" },
-    { correct: "몇 개", wrong: "몇개" },
-    { correct: "이상 없다", wrong: "이상없다" },
-    { correct: "잘못되다", wrong: "잘못 되다" },
-    { correct: "되어 있다", wrong: "되어있다" },
-    { correct: "할 것이다", wrong: "할것이다" },
-    { correct: "안 된다", wrong: "안된다" },
-    { correct: "못 한다", wrong: "못한다" }
+    { correct: "북미대결", wrong: "북미 대결" },
+    { correct: "한미관계", wrong: "한미 관계" },
+    { correct: "남북정상회담", wrong: "남북 정상회담" },
+    { correct: "미일동맹", wrong: "미일 동맹" },
+    { correct: "한·미·일", wrong: "한미일" },
+    { correct: "4.19혁명", wrong: "4.19 혁명" },
+    { correct: "6.15남북공동선언", wrong: "6.15 남북공동선언" },
+    { correct: "6월항쟁", wrong: "6월 항쟁" },
+    { correct: "9월평양선언", wrong: "9월 평양선언" },
+    { correct: "대북 정책", wrong: "대북정책" }
+
+    // 와일드카드 예시
+    { correct: "민주*당", wrong: "민주 *당" },
+    { correct: "한*연합", wrong: "한 * 연합" },
+    { correct: "조선민주주의인민공화국", wrong: "조선 민주주의 인민 공화국" }
 ];
 
+// ==============================
+// 와일드카드 패턴을 정규식으로 변환
+// ==============================
+function wildcardToRegex(pattern) {
+    const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+    const regex = escaped.replace(/\*/g, '.*?');
+    return new RegExp(regex, 'g');
+}
+
+// ==============================
+// 검사 함수
+// ==============================
 function checkSpacing() {
     const text = document.getElementById("inputText").value;
-    const resultArea = document.getElementById("resultArea");
+    const resultDiv = document.getElementById("result");
 
-    let foundErrors = [];
+    let errors = [];
 
     dictionary.forEach(item => {
-        if (text.includes(item.wrong)) {
-            foundErrors.push(
-                `"${item.wrong}" → "${item.correct}" 로 수정하세요.`
-            );
+        const wrongRegex = wildcardToRegex(item.wrong);
+        const matches = text.match(wrongRegex);
+
+        if (matches) {
+            matches.forEach(match => {
+                let suggestion = item.correct;
+
+                // * 대응값 추출
+                if (item.wrong.includes("*") && item.correct.includes("*")) {
+                    const wrongParts = item.wrong.split("*");
+                    const captured = match
+                        .replace(wrongParts[0], "")
+                        .replace(wrongParts[1], "");
+                    suggestion = item.correct.replace("*", captured.trim());
+                }
+
+                errors.push(
+                    `❌ <b>${match}</b> → <b>${suggestion}</b>`
+                );
+            });
         }
     });
 
-    if (foundErrors.length === 0) {
-        resultArea.innerHTML = `<p class="success">띄어쓰기 오류를 찾지 못했습니다.</p>`;
+    if (errors.length === 0) {
+        resultDiv.innerHTML = `<p class="good">오류가 발견되지 않았습니다.</p>`;
     } else {
-        let html = `<h3>찾아낸 오류 목록</h3>`;
-        foundErrors.forEach(err => {
-            html += `<div class="error">• ${err}</div>`;
-        });
-        resultArea.innerHTML = html;
+        resultDiv.innerHTML =
+            `<h3>발견된 띄어쓰기 오류</h3>` +
+            errors.map(e => `<div class="error">${e}</div>`).join("");
     }
 }
 </script>
