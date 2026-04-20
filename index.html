@@ -5,45 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>15번가 띄어쓰기 검사기</title>
 <style>
-body {
+body{
     font-family: sans-serif;
     max-width: 900px;
     margin: 30px auto;
     padding: 20px;
 }
-textarea {
-    width: 100%;
-    height: 220px;
-    font-size: 16px;
-    padding: 10px;
+textarea{
+    width:100%;
+    height:220px;
+    font-size:16px;
+    padding:10px;
 }
-button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 16px;
+button{
+    margin-top:15px;
+    padding:10px 20px;
+    font-size:16px;
 }
-.result {
-    margin-top: 25px;
-    padding: 15px;
-    background: #f3f3f3;
-    border-radius: 8px;
+.result{
+    margin-top:25px;
+    padding:15px;
+    background:#f3f3f3;
+    border-radius:8px;
 }
-.error {
-    color: red;
-    margin-bottom: 8px;
+.error{
+    color:red;
+    margin-bottom:8px;
 }
-.good {
-    color: green;
+.good{
+    color:green;
 }
-code {
-    background: #fff;
-    padding: 2px 5px;
+code{
+    background:#fff;
+    padding:2px 5px;
 }
 </style>
 </head>
 <body>
 
-<h2>띄어쓰기 검사기 v0.4</h2>
+<h2>띄어쓰기 검사기 v0.5</h2>
 
 <textarea id="inputText" placeholder="검사할 글을 입력하세요"></textarea>
 <br>
@@ -52,12 +52,10 @@ code {
 <div class="result" id="result"></div>
 
 <script>
-// ==============================
-// 사전 등록
-// correct = 올바른 형태
-// wrong   = 잘못 쓴 형태
-// * 사용 가능
-// ==============================
+// =======================
+// 사전
+// * = 한 글자
+// =======================
 const dictionary = [
     { correct: "북미대결", wrong: "북미 대결" },
     { correct: "남북대결", wrong: "남북 대결" },
@@ -180,21 +178,24 @@ const dictionary = [
 	{ correct: "우크라이나 전쟁", wrong: "우크라이나전쟁" },
 	{ correct: "반제자주", wrong: "반제 자주" },
 	{ correct: "연인원", wrong: "연 인원" },
-	{ correct: "주최 측", wrong: "주최측" }
-];
+	{ correct: "주최 측", wrong: "주최측" }];
 
-// ==============================
-// 와일드카드 패턴을 정규식으로 변환
-// ==============================
+// =======================
+// 와일드카드 변환
+// * = 정확히 한 글자
+// =======================
 function wildcardToRegex(pattern) {
     const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
-    const regex = escaped.replace(/\*/g, '.*?');
+
+    // * → 한 글자 (공백 제외)
+    const regex = escaped.replace(/\*/g, '([^\\s])');
+
     return new RegExp(regex, 'g');
 }
 
-// ==============================
-// 검사 함수
-// ==============================
+// =======================
+// 검사
+// =======================
 function checkSpacing() {
     const text = document.getElementById("inputText").value;
     const resultDiv = document.getElementById("result");
@@ -202,31 +203,25 @@ function checkSpacing() {
     let errors = [];
 
     dictionary.forEach(item => {
-        const wrongRegex = wildcardToRegex(item.wrong);
-        const matches = text.match(wrongRegex);
+        const regex = wildcardToRegex(item.wrong);
+        let match;
 
-        if (matches) {
-            matches.forEach(match => {
-                let suggestion = item.correct;
+        while ((match = regex.exec(text)) !== null) {
+            let found = match[0];
+            let suggestion = item.correct;
 
-                // * 대응값 추출
-                if (item.wrong.includes("*") && item.correct.includes("*")) {
-                    const wrongParts = item.wrong.split("*");
-                    const captured = match
-                        .replace(wrongParts[0], "")
-                        .replace(wrongParts[1], "");
-                    suggestion = item.correct.replace("*", captured.trim());
-                }
+            // * 치환
+            if (item.correct.includes("*")) {
+                suggestion = suggestion.replace("*", match[1]);
+            }
 
-                errors.push(
-                    `❌ <b>${match}</b> → <b>${suggestion}</b>`
-                );
-            });
+            errors.push(`❌ <b>${found}</b> → <b>${suggestion}</b>`);
         }
     });
 
-    if (errors.length == 0) {
-        resultDiv.innerHTML = `<p class="good">오류가 발견되지 않았습니다.</p>`;
+    if (errors.length === 0) {
+        resultDiv.innerHTML =
+            `<p class="good">오류가 발견되지 않았습니다.</p>`;
     } else {
         resultDiv.innerHTML =
             `<h3>발견된 띄어쓰기 오류</h3>` +
