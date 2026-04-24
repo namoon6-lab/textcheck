@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>15번가 띄어쓰기 검사기</title>
+<title>자주시보 띄어쓰기 검사기</title>
 <style>
 body{
     font-family: sans-serif;
@@ -43,7 +43,7 @@ code{
 </head>
 <body>
 
-<h2>띄어쓰기 검사기 v0.8 (2026.4.24)</h2>
+<h2>띄어쓰기 검사기 v0.9 (2026.4.25)</h2>
 
 <textarea id="inputText" placeholder="검사할 글을 입력하세요"></textarea>
 <br>
@@ -65,7 +65,12 @@ const dictionary = [
     { correct: "북미관계", wrong: "북미 관계" },
 	{ correct: "북러협력", wrong: "북러 협력" },
 	{ correct: "남북협력", wrong: "남북 협력" },
-    { correct: " **정상회담", wrong: " ** 정상회담" },
+    { correct: "남북정상회담", wrong: "남북 정상회담" },
+    { correct: "북미정상회담", wrong: "북미 정상회담" },
+    { correct: "한미정상회담", wrong: "한미 정상회담" },
+    { correct: "북러정상회담", wrong: "북러 정상회담" },
+    { correct: "한일정상회담", wrong: "한일 정상회담" },
+    { correct: "미중정상회담", wrong: "미중 정상회담" },
     { correct: "미일동맹", wrong: "미일 동맹" },
     { correct: "한미동맹", wrong: "한미 동맹" },
     { correct: "북러동맹", wrong: "북러 동맹" },
@@ -137,6 +142,7 @@ const dictionary = [
 	{ correct: "미 대사관", wrong: "미대사관" },
 	{ correct: "미국 대사관", wrong: "미국대사관" },
 	{ correct: "미국 대사", wrong: "미국대사" },
+	{ correct: "주한 미 대사", wrong: "주한미대사" },
 	{ correct: "주한미군", wrong: "주한 미군" },
 	{ correct: "주한미군기지", wrong: "주한 미군 기지" },
 	{ correct: "진보연합정당", wrong: "진보 연합 정당" },
